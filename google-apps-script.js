@@ -1,30 +1,7 @@
 /**
  * ============================================================
- *  GOOGLE APPS SCRIPT – Wedding RSVP Backend
+ *  GOOGLE APPS SCRIPT – Wedding RSVP Backend - Bản Nâng Cấp Giao Diện
  *  Văn Cường & Hải Lý
- *
- *  HƯỚNG DẪN CÀI ĐẶT (làm 1 lần duy nhất):
- *  ─────────────────────────────────────────
- *  1. Vào https://sheets.google.com → tạo Google Sheet mới
- *     Bạn không cần tạo tab, đoạn script dưới đây sẽ tự động 
- *     tạo 2 tab "Nhà Trai" và "Nhà Gái" khi có khách đăng ký!
- *
- *  2. Vào menu Extensions → Apps Script
- *
- *  3. Xóa code có sẵn, dán toàn bộ code file này vào → Save
- *
- *  4. Click Deploy → New deployment
- *     - Type: Web app
- *     - Description: v1
- *     - Execute as: Me (your Google account)
- *     - Who has access: Anyone
- *     → Deploy → Copy URL (dạng https://script.google.com/macros/s/.../exec)
- *
- *  5. Dán URL đó vào SCRIPT_URL trong 4 file sau:
- *     - Nhà Trai/js/main.js
- *     - Nhà Trai/js/admin.js
- *     - Nhà Gái/js/main.js
- *     - Nhà Gái/js/admin.js
  * ============================================================
  */
 
@@ -45,26 +22,91 @@ function doPost(e) {
     const sheetName = getSheetBySource(data.source);
     let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
     
-    // Tạo tab mới nếu chưa tồn tại
+    // 1. TẠO TAB MỚI VÀ ĐỊNH DẠNG HEADER ĐẸP MẮT
     if (!sheet) {
       sheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet(sheetName);
     }
-
-    // Tạo header nếu sheet còn trống
+    
     if (sheet.getLastRow() === 0) {
-      sheet.appendRow(['id','name','phone','attend','guests','message','time']);
-      sheet.setFrozenRows(1);
+      // Viết Tiếng Việt cho các cột để người dùng dễ xem
+      sheet.appendRow(['Mã ID', 'Họ và Tên', 'Số Điện Thoại', 'Tình Trạng Xác Nhận', 'Người Đi Cùng', 'Lời Nhắn Gửi', 'Thời Gian Gửi']);
+      sheet.setFrozenRows(1); // Cố định dòng tiêu đề
+      
+      // Makeup Header
+      const headerRange = sheet.getRange(1, 1, 1, 7);
+      headerRange.setFontWeight('bold');
+      headerRange.setBackground('#F4CCCC'); // Màu hồng pastel hợp đám cưới
+      headerRange.setFontColor('#990000');  // Chữ đỏ đậm
+      headerRange.setHorizontalAlignment('center');
+      headerRange.setVerticalAlignment('middle');
+      
+      // Độ rộng các cột
+      sheet.setColumnWidth(1, 110); // ID
+      sheet.setColumnWidth(2, 200); // Tên
+      sheet.setColumnWidth(3, 130); // Điện thoại
+      sheet.setColumnWidth(4, 180); // Xác nhận
+      sheet.setColumnWidth(5, 120); // Số người
+      sheet.setColumnWidth(6, 350); // Lời nhắn
+      sheet.setColumnWidth(7, 160); // Thời gian
     }
 
+    // 2. CHUẨN BỊ DỮ LIỆU CẢI THIỆN (Tiếng Việt & Màu)
+    let attendVi = '⏳ Chưa phản hồi';
+    let bgColor = '#FFFFFF';
+    let fgColor = '#000000';
+    
+    if (data.attend === 'yes') {
+      attendVi = '✅ Có tham dự';
+      bgColor = '#D9EAD3'; // Xanh lá pastel
+      fgColor = '#274E13';
+    } else if (data.attend === 'no') {
+      attendVi = '❌ Rất tiếc, không đến được';
+      bgColor = '#F8CECC'; // Đỏ nhạt pastel
+      fgColor = '#990000';
+    }
+
+    // Điện thoại thêm dấu nháy đơn ' ở trước để Sheet không tự xóa số 0
+    const phoneNum = data.phone ? "'" + data.phone : '';
+
+    // Ghi dữ liệu vào dòng cuối cùng
     sheet.appendRow([
       data.id      || Date.now(),
       data.name    || '',
-      data.phone   || '',
-      data.attend  || '',
+      phoneNum,
+      attendVi,
       data.guests  || 0,
       data.message || '',
-      data.time    || new Date().toISOString()
+      new Date() // Lưu dưới dạng Date của Google Sheets
     ]);
+
+    // 3. MAKEUP CHO DÒNG VỪA THÊM (Cell Formatting)
+    const lastRow = sheet.getLastRow();
+    
+    // Toàn bộ dòng
+    const rowRange = sheet.getRange(lastRow, 1, 1, 7);
+    rowRange.setVerticalAlignment('middle');
+    rowRange.setBorder(true, true, true, true, true, true, '#CCCCCC', SpreadsheetApp.BorderStyle.SOLID);
+    
+    // Căn giữa cột ID (cột 1)
+    sheet.getRange(lastRow, 1).setHorizontalAlignment('center');
+    
+    // Căn giữa cột SDT (cột 3)
+    sheet.getRange(lastRow, 3).setHorizontalAlignment('center');
+
+    // Make up ô Tham Dự (cột 4)
+    const attendRange = sheet.getRange(lastRow, 4);
+    attendRange.setBackground(bgColor);
+    attendRange.setFontColor(fgColor);
+    attendRange.setHorizontalAlignment('center');
+    attendRange.setFontWeight('bold');
+
+    // Make up Số người đi cùng (cột 5)
+    sheet.getRange(lastRow, 5).setHorizontalAlignment('center');
+
+    // Chỉnh format ngày giờ (cột 7)
+    const timeRange = sheet.getRange(lastRow, 7);
+    timeRange.setNumberFormat('dd/MM/yyyy HH:mm:ss');
+    timeRange.setHorizontalAlignment('center');
 
     return ContentService
       .createTextOutput(JSON.stringify({ ok: true }))
@@ -103,14 +145,29 @@ function doGet(e) {
     const data = rows
       .filter(function(row) { return row[0]; }) // bỏ hàng trống
       .map(function(row) {
+        
+        // Chuyển hóa lại dạng Tiếng Việt về 'yes' / 'no' để tương thích trang Admin của bạn
+        let attStr = (row[3] || '').toString().toLowerCase();
+        let attKey = '';
+        if (attStr.includes('c') || attStr.includes('yes')) attKey = 'yes';
+        if (attStr.includes('kh') || attStr.includes('no')) attKey = 'no';
+        
+        // Chuẩn hóa thời gian sang chuỗi ISO 
+        let timeIso = '';
+        if (row[6] instanceof Date) {
+          timeIso = row[6].toISOString();
+        } else if (row[6]) {
+          timeIso = new Date(row[6]).toISOString();
+        }
+
         return {
           id:      row[0],
           name:    row[1],
-          phone:   row[2],
-          attend:  row[3],
+          phone:   (row[2] || '').toString().replace(/'/g, ''),
+          attend:  attKey,
           guests:  row[4],
           message: row[5],
-          time:    row[6]
+          time:    timeIso
         };
       });
 
