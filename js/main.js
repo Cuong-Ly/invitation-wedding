@@ -13,7 +13,7 @@ const REVEAL_THRESHOLD   = 0.12;   // Ngưỡng IntersectionObserver
 
 // 🔧 Dán URL Google Apps Script vào đây (xem file google-apps-script.js để biết cách lấy)
 // Nếu để rỗng thì chỉ lưu localStorage (không chia sẻ được giữa các thiết bị)
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbXSpnDBngck5cimwgXE1Ws3q2C96UGGrcOhO22-Vi-Cz2xp01Q75TCna-A8GyuBPe_A/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbySEb6Gza8VaFXvlBvNccAVOzy84h0ZOtIbM76s2DN1LZ0CWRsSrop0q2Se8h5WpSfgxg/exec';
 
 /* ─────────────────────────────────────────────────────────
    HEARTS CANVAS – Trái tim rơi xuyên suốt
