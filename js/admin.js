@@ -11,7 +11,7 @@ window.addEventListener('load', function() {
 
 // 🔧 Dán URL Google Apps Script vào đây (cùng URL với main.js)
 // Xem file google-apps-script.js để biết cách tạo
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzDxAYNGxTTWGSlS7GfLTOtQ9FYE5R4p39RMlNW6J0ZiqOZPHfgAF88_jhpijXnOgDn/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbXSpnDBngck5cimwgXE1Ws3q2C96UGGrcOhO22-Vi-Cz2xp01Q75TCna-A8GyuBPe_A/exec';
 
 const KEY = 'wedding_rsvp';
 let appData = []; // Dữ liệu cache trên bộ nhớ
@@ -27,7 +27,7 @@ function loadAllData(callback) {
     if (wrap && !wrap.querySelector('table')) {
       wrap.innerHTML = '<div class="empty-state"><span class="empty-icon">⏳</span><div class="empty-title">Đang tải dữ liệu...</div></div>';
     }
-    fetch(SCRIPT_URL + (SCRIPT_URL.includes('?') ? '&' : '?') + '_t=' + Date.now())
+    fetch(SCRIPT_URL + (SCRIPT_URL.includes('?') ? '&' : '?') + 'source=nhatrai&_t=' + Date.now())
       .then(function(r) { return r.json(); })
       .then(function(json) {
         callback(json.ok ? json.data : loadData());
