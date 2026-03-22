@@ -99,10 +99,35 @@ function openCurtain() {
   setTimeout(() => {
     curtain.style.pointerEvents = 'none';
     document.getElementById('page').classList.add('visible');
+    const header = document.getElementById('site-header');
+    if (header) header.classList.add('visible');
     initHeroSlider(); // Gọi hàm khởi tạo slide
   }, 800);
 
   startHearts();
+
+  // Bật nhạc cưới ngay lúc này (vì người dùng đã tương tác click)
+  const bgMusic = document.getElementById('bg-music');
+  if (bgMusic) {
+    bgMusic.play().then(() => {
+      document.getElementById('music-toggle').classList.add('playing');
+    }).catch(err => console.log('Chưa thể tự động phát nhạc:', err));
+  }
+}
+
+/* Tắt / Mở nhạc */
+function toggleMusic() {
+  const bgMusic = document.getElementById('bg-music');
+  const toggleBtn = document.getElementById('music-toggle');
+  if (!bgMusic) return;
+
+  if (bgMusic.paused) {
+    bgMusic.play();
+    toggleBtn.classList.add('playing');
+  } else {
+    bgMusic.pause();
+    toggleBtn.classList.remove('playing');
+  }
 }
 
 /* Curtain: hỗ trợ mở bằng bàn phím (Enter / Space) - onclick xử lý click trong HTML */
@@ -325,6 +350,21 @@ const revealObserver = new IntersectionObserver((entries) => {
 }, { threshold: REVEAL_THRESHOLD });
 
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+/* ─────────────────────────────────────────────────────────
+   SITE HEADER – Scroll shadow effect
+───────────────────────────────────────────────────────── */
+(function initHeaderScroll() {
+  const header = document.getElementById('site-header');
+  if (!header) return;
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 40) {
+      header.classList.add('scrolled');
+    } else {
+      header.classList.remove('scrolled');
+    }
+  }, { passive: true });
+})();
 
 /* ─────────────────────────────────────────────────────────
    RSVP – Xác nhận tham dự + Lưu vào localStorage
